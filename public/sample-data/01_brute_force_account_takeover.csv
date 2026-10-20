@@ -1,0 +1,15 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-09-01T08:55:10Z,10.10.0.12,neha,successful_login,success,vpn,Normal employee login
+2026-09-01T08:58:22Z,198.51.100.44,unknown,port_scan,blocked,10.10.0.0/24,Probed SSH and web administration ports
+2026-09-01T09:00:04Z,10.10.0.7,system,service_health,success,identity-service,Health check passed
+2026-09-01T09:01:11Z,198.51.100.44,administrator,failed_login,failure,vpn,Incorrect password
+2026-09-01T09:01:39Z,198.51.100.44,administrator,failed_login,failure,vpn,Incorrect password
+2026-09-01T09:02:02Z,198.51.100.44,administrator,failed_login,failure,vpn,Incorrect password
+2026-09-01T09:02:26Z,198.51.100.44,administrator,failed_login,failure,vpn,Incorrect password
+2026-09-01T09:03:08Z,198.51.100.44,administrator,successful_login,success,vpn,Authentication accepted after repeated failures
+2026-09-01T09:05:41Z,198.51.100.44,administrator,privilege_escalation,success,domain-admin,New privileged token issued
+2026-09-01T09:07:16Z,198.51.100.44,administrator,sensitive_file_access,success,/finance/budget-2027.xlsx,Confidential finance workbook opened
+2026-09-01T09:10:55Z,10.10.0.18,arjun,file_access,success,/shared/policies.pdf,Normal document access
+2026-09-01T09:12:31Z,198.51.100.44,administrator,data_exfiltration,success,203.0.113.90,436 MB encrypted outbound transfer
+2026-09-01T09:14:09Z,10.10.0.5,soc,session_revoked,success,administrator,Compromised VPN session revoked
+2026-09-01T09:14:38Z,10.10.0.5,soc,ip_blocked,success,198.51.100.44,Attacker address blocked

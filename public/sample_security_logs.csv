@@ -1,0 +1,21 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-08-31T10:20:05Z,10.0.0.14,anita,successful_login,success,hr-portal,Normal employee login
+2026-08-31T10:21:42Z,10.0.0.8,system,service_health,success,auth-service,Health check passed
+2026-08-31T10:23:10Z,10.0.0.22,rahul,file_access,success,/shared/handbook.pdf,Public document opened
+2026-08-31T10:25:00Z,192.168.1.24,unknown,port_scan,blocked,10.0.0.0/24,Sequential probes against 42 ports
+2026-08-31T10:27:14Z,10.0.0.19,meera,successful_login,success,mail,Normal employee login
+2026-08-31T10:30:11Z,192.168.1.24,admin,failed_login,failure,admin-portal,Incorrect password
+2026-08-31T10:30:43Z,192.168.1.24,admin,failed_login,failure,admin-portal,Incorrect password
+2026-08-31T10:31:08Z,192.168.1.24,admin,failed_login,failure,admin-portal,Incorrect password
+2026-08-31T10:31:36Z,192.168.1.24,admin,failed_login,failure,admin-portal,Incorrect password
+2026-08-31T10:32:04Z,192.168.1.24,admin,failed_login,failure,admin-portal,Incorrect password
+2026-08-31T10:32:39Z,192.168.1.24,admin,successful_login,success,admin-portal,Login accepted after repeated failures
+2026-08-31T10:34:12Z,192.168.1.24,admin,privilege_escalation,success,domain-admin,User added to privileged group
+2026-08-31T10:35:20Z,10.0.0.25,dev,git_pull,success,internal-repo,Normal source pull
+2026-08-31T10:37:51Z,192.168.1.24,admin,sensitive_file_access,success,/finance/payroll.csv,Payroll export opened
+2026-08-31T10:39:02Z,192.168.1.24,admin,database_dump,success,customer-db,Large database export created
+2026-08-31T10:41:17Z,10.0.0.30,backup,backup_completed,success,archive-02,Nightly backup completed
+2026-08-31T10:43:33Z,192.168.1.24,admin,data_exfiltration,success,203.0.113.77,842 MB outbound encrypted transfer
+2026-08-31T10:47:08Z,10.0.0.11,soc,session_revoked,success,admin,Incident response revoked session
+2026-08-31T10:49:44Z,10.0.0.11,soc,ip_blocked,success,192.168.1.24,Source blocked at firewall
+2026-08-31T10:54:22Z,10.0.0.16,kavya,successful_logout,success,vpn,Normal logout

@@ -1,0 +1,92 @@
+{
+  "model": "XGBoost XGBClassifier",
+  "classes": [
+    "MALICIOUS",
+    "NORMAL",
+    "SUSPICIOUS"
+  ],
+  "embedding_model": "distilbert/distilbert-base-uncased",
+  "embedding_dimension": 768,
+  "pooling": "attention-mask mean pooling over last hidden state",
+  "max_tokens": 128,
+  "structured_features": [
+    "risk_keyword_count",
+    "authentication_signal",
+    "privilege_signal",
+    "outbound_transfer_signal",
+    "script_execution_signal",
+    "malware_signal",
+    "failure_status",
+    "has_ip",
+    "has_domain",
+    "source_risk"
+  ],
+  "feature_count": 778,
+  "metrics": {
+    "dataset": "backend/data/training_events.csv",
+    "samples": 60,
+    "class_distribution": {
+      "MALICIOUS": 20,
+      "NORMAL": 20,
+      "SUSPICIOUS": 20
+    },
+    "train_samples": 45,
+    "test_samples": 15,
+    "test_fraction": 0.25,
+    "random_state": 42,
+    "accuracy": 0.7333,
+    "macro_precision": 0.7937,
+    "macro_recall": 0.7333,
+    "macro_f1": 0.7107,
+    "confusion_matrix": [
+      [
+        4,
+        1,
+        0
+      ],
+      [
+        0,
+        5,
+        0
+      ],
+      [
+        2,
+        1,
+        2
+      ]
+    ],
+    "classification_report": {
+      "MALICIOUS": {
+        "precision": 0.6666666666666666,
+        "recall": 0.8,
+        "f1-score": 0.7272727272727273,
+        "support": 5.0
+      },
+      "NORMAL": {
+        "precision": 0.7142857142857143,
+        "recall": 1.0,
+        "f1-score": 0.8333333333333334,
+        "support": 5.0
+      },
+      "SUSPICIOUS": {
+        "precision": 1.0,
+        "recall": 0.4,
+        "f1-score": 0.5714285714285714,
+        "support": 5.0
+      },
+      "accuracy": 0.7333333333333333,
+      "macro avg": {
+        "precision": 0.7936507936507936,
+        "recall": 0.7333333333333334,
+        "f1-score": 0.7106782106782106,
+        "support": 15.0
+      },
+      "weighted avg": {
+        "precision": 0.7936507936507937,
+        "recall": 0.7333333333333333,
+        "f1-score": 0.7106782106782107,
+        "support": 15.0
+      }
+    }
+  }
+}

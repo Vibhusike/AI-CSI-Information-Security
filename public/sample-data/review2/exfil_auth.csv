@@ -1,0 +1,2 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-09-14T14:58:12Z,10.40.3.22,devops,successful_login,success,engineering-vpn,Interactive login preceded data staging

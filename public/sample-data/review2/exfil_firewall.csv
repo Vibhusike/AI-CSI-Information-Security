@@ -1,0 +1,2 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-09-14T15:07:35Z,10.40.3.22,devops,suspicious_outbound_connection,allowed,203.0.113.160,Long-lived TLS connection transferred 440 MB

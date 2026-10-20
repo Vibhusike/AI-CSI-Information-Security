@@ -1,0 +1,6 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-09-12T09:12:00Z,10.24.8.19,riya,successful_login,success,mail.office.example,Expected campus login from Vellore
+2026-09-12T09:20:31Z,203.0.113.45,riya,mfa_fatigue,blocked,identity-provider,Seven MFA prompts generated within 90 seconds
+2026-09-12T09:22:04Z,203.0.113.45,riya,impossible_travel_login,success,mail.office.example,Successful login from Singapore 10 minutes after India session
+2026-09-12T09:25:18Z,203.0.113.45,riya,oauth_token_use,success,mail.office.example,New browser token used by unfamiliar client
+2026-09-12T09:29:40Z,203.0.113.45,riya,mailbox_rule_created,success,forward-all,External forwarding rule created for finance messages

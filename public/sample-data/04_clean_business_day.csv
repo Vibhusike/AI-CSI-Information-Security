@@ -1,0 +1,13 @@
+date,ip,username,activity,result,target,notes
+2026-09-04T08:30:02Z,10.40.0.12,ananya,successful_login,success,vpn,Expected morning login
+2026-09-04T08:34:17Z,10.40.0.14,rohan,successful_login,success,email,Expected morning login
+2026-09-04T08:41:05Z,10.40.0.8,system,service_health,success,identity-service,Automated health check
+2026-09-04T09:05:28Z,10.40.0.12,ananya,file_access,success,/shared/marketing-plan.pdf,Normal shared document access
+2026-09-04T09:17:49Z,10.40.0.21,dev-build,git_pull,success,internal-repo,Scheduled build source pull
+2026-09-04T10:00:00Z,10.40.0.30,backup,backup_completed,success,archive-04,Scheduled incremental backup
+2026-09-04T10:22:33Z,10.40.0.14,rohan,file_access,success,/shared/meeting-notes.docx,Normal shared document access
+2026-09-04T11:45:08Z,10.40.0.16,isha,successful_login,success,hr-portal,Expected application login
+2026-09-04T12:15:41Z,10.40.0.8,system,service_health,success,api-gateway,Automated health check
+2026-09-04T14:30:19Z,10.40.0.21,dev-build,deployment_completed,success,staging,Approved deployment completed
+2026-09-04T16:55:22Z,10.40.0.16,isha,successful_logout,success,hr-portal,Normal logout
+2026-09-04T17:10:06Z,10.40.0.12,ananya,successful_logout,success,vpn,Normal logout

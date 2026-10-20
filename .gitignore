@@ -1,0 +1,23 @@
+# Dependencies and build caches
+.venv/
+node_modules/
+.next/
+dist/
+.vinext/
+.wrangler/
+.openai/
+__pycache__/
+.pytest_cache/
+*.pyc
+# Local credentials and configuration
+.env
+.env.*
+*.pem
+*.key
+# Downloaded data and generated experiment outputs
+data/
+results/
+backend/data/beth*.zip
+backend/data/labelled_*.csv
+# Miscellaneous workstation files
+.DS_Store

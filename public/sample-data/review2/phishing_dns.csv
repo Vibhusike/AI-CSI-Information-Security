@@ -1,0 +1,3 @@
+timestamp,source_ip,user,event_type,status,resource,details
+2026-09-12T09:18:48Z,10.24.8.19,riya,dns_query,success,login-microsoft-support.example,Resolved to 198.51.100.77 immediately before IDS alert
+2026-09-12T09:24:27Z,203.0.113.45,riya,dns_query,success,token-sync.example,Resolved to 198.51.100.88 during token use

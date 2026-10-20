@@ -1,0 +1,4 @@
+[
+  {"timestamp":"2026-09-12T09:16:45Z","source_ip":"198.51.100.24","user":"riya","event_type":"email_header_anomaly","status":"delivered","resource":"Quarterly Scholarship Update","details":"From scholarships@vit-support.example; SPF fail; DKIM fail; Reply-To account-review@vit-support.example"},
+  {"timestamp":"2026-09-12T09:17:12Z","source_ip":"10.24.8.19","user":"riya","event_type":"malicious_link_clicked","status":"opened","resource":"login-microsoft-support.example","details":"Link in the synthetic message redirected to login-microsoft-support.example"}
+]

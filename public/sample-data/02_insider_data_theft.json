@@ -1,0 +1,74 @@
+[
+  {
+    "time": "2026-09-02T13:00:10Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "successful_login",
+    "outcome": "success",
+    "target": "engineering-portal",
+    "message": "Normal office login"
+  },
+  {
+    "time": "2026-09-02T13:08:44Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "file_access",
+    "outcome": "success",
+    "target": "/engineering/roadmap.pdf",
+    "message": "Project roadmap opened"
+  },
+  {
+    "time": "2026-09-02T13:14:03Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "admin_grant",
+    "outcome": "success",
+    "target": "analytics-admin",
+    "message": "Temporary administrator role granted outside change window"
+  },
+  {
+    "time": "2026-09-02T13:17:27Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "sensitive_file_access",
+    "outcome": "success",
+    "target": "/legal/acquisition-targets.xlsx",
+    "message": "Restricted acquisition list opened"
+  },
+  {
+    "time": "2026-09-02T13:20:16Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "database_dump",
+    "outcome": "success",
+    "target": "customer-analytics-db",
+    "message": "Full customer export generated"
+  },
+  {
+    "time": "2026-09-02T13:23:55Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "large_upload",
+    "outcome": "success",
+    "target": "personal-cloud.example",
+    "message": "1.2 GB uploaded to an unsanctioned cloud destination"
+  },
+  {
+    "time": "2026-09-02T13:28:40Z",
+    "client_ip": "10.20.4.17",
+    "account": "priya",
+    "action": "successful_logout",
+    "outcome": "success",
+    "target": "engineering-portal",
+    "message": "User logged out"
+  },
+  {
+    "time": "2026-09-02T13:32:11Z",
+    "client_ip": "10.20.1.5",
+    "account": "soc",
+    "action": "account_disabled",
+    "outcome": "success",
+    "target": "priya",
+    "message": "Account disabled pending investigation"
+  }
+]

@@ -1,0 +1,10 @@
+{"datetime":"2026-09-03T06:45:00Z","src_ip":"10.30.8.41","username":"vikram","event":"successful_login","result":"success","path":"workstation-41","description":"Normal workstation login"}
+{"datetime":"2026-09-03T06:48:19Z","src_ip":"10.30.8.41","username":"vikram","event":"email_attachment_opened","result":"success","path":"invoice_august.zip","description":"Compressed attachment opened from external sender"}
+{"datetime":"2026-09-03T06:49:42Z","src_ip":"10.30.8.41","username":"vikram","event":"powershell_command","result":"success","path":"powershell.exe","description":"Encoded command launched from archive process"}
+{"datetime":"2026-09-03T06:50:13Z","src_ip":"10.30.8.41","username":"vikram","event":"malware_detection","result":"blocked","path":"C:\\Users\\vikram\\AppData\\invoice.exe","description":"Known loader signature detected"}
+{"datetime":"2026-09-03T06:51:37Z","src_ip":"10.30.8.41","username":"vikram","event":"ransomware_activity","result":"detected","path":"C:\\Users\\Public\\Documents","description":"Rapid file encryption and extension changes observed"}
+{"datetime":"2026-09-03T06:52:20Z","src_ip":"10.30.8.52","username":"service_backup","event":"ransomware_activity","result":"detected","path":"\\\\fileserver\\team-share","description":"Encryption activity spread to network share"}
+{"datetime":"2026-09-03T06:54:01Z","src_ip":"10.30.8.41","username":"vikram","event":"large_upload","result":"success","path":"198.51.100.81","description":"210 MB outbound transfer before containment"}
+{"datetime":"2026-09-03T06:55:15Z","src_ip":"10.30.1.9","username":"edr","event":"host_isolated","result":"success","path":"workstation-41","description":"Endpoint isolated from the network"}
+{"datetime":"2026-09-03T06:56:04Z","src_ip":"10.30.1.9","username":"edr","event":"process_terminated","result":"success","path":"invoice.exe","description":"Malicious process terminated"}
+{"datetime":"2026-09-03T07:00:33Z","src_ip":"10.30.1.7","username":"soc","event":"incident_opened","result":"success","path":"INC-2026-0903","description":"Ransomware incident escalated to response team"}
