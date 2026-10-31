@@ -101,6 +101,23 @@ def test_openai_responses_key_and_structured_claim_selection(investigation, monk
 def test_openai_missing_key_falls_back(investigation, monkeypatch):
     monkeypatch.setenv("AICSI_LLM_PROVIDER", "openai")
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(forensic, "dotenv_values", lambda _: {})
     report = forensic.build_review3(investigation)
     assert report["summary"]
     assert report["llmStatus"] == "OpenAI key missing"
+
+
+def test_openai_reads_key_added_after_start(investigation, monkeypatch):
+    captured = {}
+    class FakeResponse:
+        def raise_for_status(self): pass
+        def json(self): return {"output": [{"type": "message", "content": [{"type": "output_text", "text": '{"ids":["D1"]}'}]}]}
+    def fake_post(url, **kwargs):
+        captured.update(kwargs)
+        return FakeResponse()
+    monkeypatch.setenv("AICSI_LLM_PROVIDER", "openai")
+    monkeypatch.setenv("OPENAI_API_KEY", "")
+    monkeypatch.setattr(forensic, "dotenv_values", lambda _: {"OPENAI_API_KEY": "test-file-key"})
+    monkeypatch.setattr(forensic.httpx, "post", fake_post)
+    assert forensic.build_review3(investigation)["llmStatus"] == "ready"
+    assert captured["headers"]["Authorization"] == "Bearer test-file-key"

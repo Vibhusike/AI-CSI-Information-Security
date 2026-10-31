@@ -9,9 +9,11 @@ import io
 import json
 import os
 import re
+from pathlib import Path
 from typing import Any
 
 import httpx
+from dotenv import dotenv_values
 
 
 def _ref(event: dict[str, Any]) -> dict[str, str]:
@@ -68,7 +70,7 @@ def _llm_select(prompt: str, allowed: list[str], limit: int) -> tuple[list[str],
             response.raise_for_status()
             content = response.json()["message"]["content"]
         elif provider == "openai":
-            key = os.getenv("OPENAI_API_KEY", "")
+            key = os.getenv("OPENAI_API_KEY") or dotenv_values(Path(__file__).with_name(".env")).get("OPENAI_API_KEY") or ""
             if not key:
                 return [], "OpenAI key missing"
             response = httpx.post("https://api.openai.com/v1/responses",

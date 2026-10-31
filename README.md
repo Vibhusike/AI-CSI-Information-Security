@@ -24,7 +24,7 @@ Sending claims to a remote OpenAI-compatible endpoint is an explicit operator ch
 
 ### OpenAI API key
 
-The dedicated `openai` provider uses OpenAI's Responses API with structured claim-ID output. It sends the bounded claim registry to OpenAI and requests `store: false`; the local service still validates every selected ID before rendering a finding. The default OpenAI model is `gpt-6-luna`, which can be changed in `backend/.env`. Create an API key in the OpenAI Platform, then put it in the ignored local `backend/.env` file as `OPENAI_API_KEY=...`. The file should have owner-only permissions (`chmod 600 backend/.env`). Restart `npm run dev` after editing. `backend/env.example` shows the expected fields without a secret. Never paste the key into the web dashboard or commit it to Git.
+The dedicated `openai` provider uses OpenAI's Responses API with structured claim-ID output. It sends the bounded claim registry to OpenAI and requests `store: false`; the local service still validates every selected ID before rendering a finding. The default OpenAI model is `gpt-6-luna`, which can be changed in `backend/.env`. Create an API key in the OpenAI Platform, then put it in the ignored local `backend/.env` file as `OPENAI_API_KEY=...`. The file should have owner-only permissions (`chmod 600 backend/.env`). The key is read when a report or Q&A request runs; restart `npm run dev` only if changing the provider or model. `backend/env.example` shows the expected fields without a secret. Never paste the key into the web dashboard or commit it to Git.
 
 | OpenAI setting | Value |
 | --- | --- |
