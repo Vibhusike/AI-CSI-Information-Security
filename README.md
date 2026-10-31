@@ -1,10 +1,46 @@
-# AI-CSI - CBS3002 Review 2
+# AI-CSI - Information Security Review 3
+
+## Review 3 reporting extension
+
+The original Review 2 analysis pipeline, saved XGBoost model, samples, and deterministic report remain in place. Review 3 adds a server-side forensic reporting layer in `backend/forensic.py` and a report / Q&A panel in the dashboard. The sections below document the Review 2 baseline and its historical evaluation; they do not describe the new reporting layer.
+
+After analysing evidence, select **Generate report**. The service builds a claim registry from the verified analysis snapshot. Each material claim has a source file, artifact ID, SHA-256, and (where applicable) event ID. Observed events, model detections, ATT&CK rule mappings, SHAP explanations, and evidence gaps are labelled separately. The attack story is ordered by event time. The Q&A endpoint selects only relevant registered claims and returns an explicit insufficient-evidence answer when none match. The PDF export includes the case, verified evidence inventory, detections, chronology, mappings, SHAP, confidence, limitations, conclusion, and full hash appendix.
+
+The LLM receives a bounded list of structured claims and returns claim IDs only. The service rejects invented IDs and ignores generated prose, so model text cannot introduce a finding. If the provider is unavailable or responds incorrectly, deterministic claim selection still produces a cited report. The current case is held in memory by the local service; restarting it requires a fresh analysis. Evidence is not persisted to a database.
+
+### LLM setup on a Mac M2 with 16 GB RAM
+
+The default is local Ollama with `qwen2.5:3b`, keeping evidence on the machine. Install Ollama separately, run `ollama pull qwen2.5:3b`, and start its service before `npm run dev`. The browser never receives an API key. Set environment variables in the local service process only:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `AICSI_LLM_PROVIDER` | `ollama` | `ollama`, `openai`, `openai_compatible`, or `disabled` |
+| `AICSI_LLM_MODEL` | Provider-specific | `qwen2.5:3b` for Ollama; `gpt-6-luna` for OpenAI |
+| `AICSI_OLLAMA_URL` | `http://127.0.0.1:11434` | Local Ollama endpoint |
+| `AICSI_LLM_BASE_URL` | unset | Explicit OpenAI-compatible `/v1` base URL |
+| `AICSI_LLM_API_KEY` | unset | Server-only bearer token for compatible providers |
+
+Sending claims to a remote OpenAI-compatible endpoint is an explicit operator choice and may disclose case details to that provider. Do not commit credentials. The `.env*` files remain ignored. The default Ollama endpoint is local.
+
+### OpenAI API key
+
+The dedicated `openai` provider uses OpenAI's Responses API with structured claim-ID output. It sends the bounded claim registry to OpenAI and requests `store: false`; the local service still validates every selected ID before rendering a finding. The default OpenAI model is `gpt-6-luna`, which can be changed in `backend/.env`. Create an API key in the OpenAI Platform, then put it in the ignored local `backend/.env` file as `OPENAI_API_KEY=...`. The file should have owner-only permissions (`chmod 600 backend/.env`). Restart `npm run dev` after editing. `backend/env.example` shows the expected fields without a secret. Never paste the key into the web dashboard or commit it to Git.
+
+| OpenAI setting | Value |
+| --- | --- |
+| `AICSI_LLM_PROVIDER` | `openai` |
+| `AICSI_LLM_MODEL` | `gpt-6-luna` (configurable) |
+| `OPENAI_API_KEY` | Secret in local `backend/.env` or server environment |
+
+Run `npm run test:backend`, `npm run lint`, `./node_modules/.bin/tsc --noEmit`, and `npm run build` to verify the implementation. The reporting tests cover valid citations, chronological order, forged LLM findings and references, offline LLM fallback, stale evidence hashes, and PDF output.
+
+## Review 2 baseline
 
 AI-CSI is a college-scale, evidence-centred cyber-investigation prototype. It ingests heterogeneous evidence, preserves provenance, normalizes events, extracts entities, classifies activity with a real ML pipeline, correlates observations in a NetworkX graph, reconstructs a timeline, maps behaviors to MITRE ATT&CK, calculates investigation confidence, recommends missing evidence, explains model predictions with SHAP, and produces a deterministic evidence-grounded report.
 
 The central Review-2 contribution is the **Missing Evidence Recommendation Engine**. It treats evidence completeness as a calculated, incident-specific investigation problem rather than a static checklist.
 
-> LLM/RAG is not implemented for Review 2. The forensic report is deterministic and evidence-grounded.
+> The Review 2 report below is deterministic. The Review 3 reporting layer above adds optional LLM-assisted claim selection and evidence-aware Q&A.
 
 ## Review-2 scope
 
@@ -60,7 +96,7 @@ The existing React/Vinext dashboard remains the investigator interface. A local 
 | MITRE ATT&CK            | Enterprise ATT&CK v19.2 subset, CC BY 4.0                            | Official versioned knowledge subset |
 | Missing evidence engine | AI-CSI domain matrix and ranking algorithm                           | Custom logic                        |
 | Confidence engine       | Review-1 weighted formula                                            | Custom logic                        |
-| LLM/RAG                 | Not implemented                                                      | Intentionally excluded              |
+| LLM/RAG (Review 2)      | Not implemented in the Review 2 baseline                              | Added for Review 3 as described above |
 
 ## DistilBERT implementation
 
@@ -448,7 +484,7 @@ public/sample-data/review2/               safe synthetic evidence files
 - Browser state is not a persistent case database.
 - PCAP and memory examples contain safe metadata, not executable or packet payloads.
 - The confidence score measures evidential support, not truth, guilt, or legal sufficiency.
-- No LLM/RAG is implemented.
+- Review 3 LLM selection is limited to registered claims; it cannot write free-form forensic findings.
 
 ## Future work
 
@@ -489,7 +525,7 @@ No. A test adds a valid unrelated artifact and verifies that technique-driven co
 The 73.33% held-out accuracy is the actual result from a deliberately small synthetic dataset. Reporting the real limitation is more defensible than inflating a college prototype result.
 
 **Does the report use an LLM?**  
-No. It is a deterministic evidence-grounded template and explicitly says so.
+The original Review 2 text report remains deterministic. The Review 3 report can use an LLM to select cited claim IDs; the final factual text is rendered from the verified claim registry.
 
 ## Final hard-coding audit
 
@@ -549,4 +585,4 @@ No. It is a deterministic evidence-grounded template and explicitly says so.
 - full ATT&CK STIX ingestion;
 - production case storage, access control, and audit infrastructure;
 - isolated binary forensic parsing; and
-- any LLM/RAG report or question-answering system.
+- broader retrieval over external intelligence sources and persistent case storage.

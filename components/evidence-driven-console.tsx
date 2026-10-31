@@ -212,6 +212,27 @@ type Analysis = {
   system: Record<string, { status: string; [key: string]: unknown }>;
 };
 
+type CitedClaim = {
+  id: string;
+  kind: string;
+  text: string;
+  citations: Array<{ artifactId: string; eventId?: string; sourceFile: string; sha256: string }>;
+};
+type Review3Report = {
+  caseId: string;
+  llmStatus: string;
+  generationMethod: string;
+  summary: CitedClaim[];
+  story: CitedClaim[];
+  detections: CitedClaim[];
+  mitre: CitedClaim[];
+  shap: CitedClaim[];
+  missingEvidence: CitedClaim[];
+  inventory: CitedClaim[];
+  limitations: string[];
+  conclusion: string;
+};
+
 type SampleFile = { url: string; name: string; type: EvidenceType };
 type Sample = {
   id: string;
@@ -979,7 +1000,7 @@ function SystemView({ analysis }: { analysis: Analysis }) {
               'Evidence-derived timeline and MITRE ATT&CK',
               'Coverage, confidence, missing-evidence ranking',
               'Real TreeSHAP explanations',
-              'Deterministic evidence-grounded report',
+              'Deterministic baseline and Review 3 cited PDF report',
             ].map((step, index) => (
               <li
                 key={step}
@@ -994,7 +1015,7 @@ function SystemView({ analysis }: { analysis: Analysis }) {
           </ol>
         </article>
         <article className="rounded-2xl border border-white/10 bg-[#0d1b19] p-5">
-          <PanelTitle eyebrow="Scope discipline" title="Review-2 boundaries" />
+          <PanelTitle eyebrow="Scope discipline" title="Investigation boundaries" />
           <ul className="space-y-3 text-sm leading-6 text-slate-400">
             <li className="flex gap-2">
               <CheckCircle2 className="mt-1 size-4 shrink-0 text-emerald-300" />
@@ -1017,7 +1038,7 @@ function SystemView({ analysis }: { analysis: Analysis }) {
             </li>
             <li className="flex gap-2">
               <AlertCircle className="mt-1 size-4 shrink-0 text-amber-300" />
-              LLM/RAG is intentionally not implemented for Review 2.
+              Review 3 uses an LLM only to select verified, cited claims; source evidence stays authoritative.
             </li>
           </ul>
         </article>
@@ -1031,6 +1052,11 @@ export default function EvidenceDrivenConsole() {
   const [caseId, setCaseId] = useState('ACSI-REVIEW2-NEW');
   const [artifacts, setArtifacts] = useState<ClientArtifact[]>([]);
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
+  const [review3, setReview3] = useState<Review3Report | null>(null);
+  const [review3Busy, setReview3Busy] = useState(false);
+  const [review3Error, setReview3Error] = useState('');
+  const [question, setQuestion] = useState('');
+  const [answer, setAnswer] = useState<{ answer: string; claims: CitedClaim[]; llmStatus: string } | null>(null);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [loading, setLoading] = useState(false);
   const [loadingText, setLoadingText] = useState('');
@@ -1068,6 +1094,7 @@ export default function EvidenceDrivenConsole() {
     ) => {
       if (!nextArtifacts.length) {
         setAnalysis(null);
+        setReview3(null);
         return;
       }
       setLoading(true);
@@ -1093,6 +1120,8 @@ export default function EvidenceDrivenConsole() {
           );
         const result = body as Analysis;
         setAnalysis(result);
+        setReview3(null);
+        setAnswer(null);
         setSelectedEventId(
           result.events.find((event) => event.classification !== 'NORMAL')
             ?.id ??
@@ -1123,6 +1152,8 @@ export default function EvidenceDrivenConsole() {
     setCaseId(makeCaseId());
     setArtifacts([]);
     setAnalysis(null);
+    setReview3(null);
+    setAnswer(null);
     setSelectedEventId('');
     setSampleLabel('');
     setAvailableSampleFiles([]);
@@ -1266,6 +1297,64 @@ export default function EvidenceDrivenConsole() {
     URL.revokeObjectURL(url);
   }
 
+  const review3Payload = () => ({
+    caseId: analysis?.caseId ?? '',
+    artifactHashes: analysis?.artifacts.map((item) => item.sha256) ?? [],
+  });
+
+  async function generateReview3() {
+    if (!analysis) return;
+    setReview3Busy(true);
+    setReview3Error('');
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/review3/report', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(review3Payload()),
+      });
+      if (!response.ok) throw new Error(((await response.json()) as { detail?: string }).detail ?? 'Report generation failed.');
+      setReview3((await response.json()) as Review3Report);
+    } catch (reason) {
+      setReview3Error(reason instanceof Error ? reason.message : 'Report generation failed.');
+    } finally { setReview3Busy(false); }
+  }
+
+  async function askInvestigation() {
+    if (!analysis || question.trim().length < 3) return;
+    setReview3Busy(true);
+    setReview3Error('');
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/review3/ask', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...review3Payload(), question: question.trim() }),
+      });
+      if (!response.ok) throw new Error(((await response.json()) as { detail?: string }).detail ?? 'Question failed.');
+      setAnswer(await response.json());
+    } catch (reason) {
+      setReview3Error(reason instanceof Error ? reason.message : 'Question failed.');
+    } finally { setReview3Busy(false); }
+  }
+
+  async function exportReview3Pdf() {
+    if (!analysis) return;
+    setReview3Busy(true);
+    setReview3Error('');
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/review3/pdf', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(review3Payload()),
+      });
+      if (!response.ok) throw new Error(((await response.json()) as { detail?: string }).detail ?? 'PDF export failed.');
+      const url = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `${analysis.caseId}-forensic-report.pdf`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (reason) {
+      setReview3Error(reason instanceof Error ? reason.message : 'PDF export failed.');
+    } finally { setReview3Busy(false); }
+  }
+
   const openFilePicker = () => {
     if (inputRef.current) {
       inputRef.current.value = '';
@@ -1285,7 +1374,7 @@ export default function EvidenceDrivenConsole() {
             </span>
             <div>
               <p className="hidden text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-300/65 sm:block">
-                CBS3002 · Review 2
+                CBS3002 · Review 3
               </p>
               <h1 className="text-base font-semibold tracking-tight sm:text-lg">
                 AI-CSI Evidence Console
@@ -1997,6 +2086,64 @@ export default function EvidenceDrivenConsole() {
                     ))}
                   </TableBody>
                 </Table>
+              </div>
+            </section>
+            <section className="rounded-2xl border border-emerald-300/20 bg-[#0d1b19] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300">Review 3 · cited investigation</p>
+                  <h2 className="mt-1 text-xl font-semibold text-white">Forensic report and evidence Q&amp;A</h2>
+                  <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">The language model selects from verified, cited claims. It cannot add facts to the report. Observations, detections, and rule mappings are labelled separately.</p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Button onClick={generateReview3} disabled={review3Busy} className="bg-emerald-400 text-[#07100f] hover:bg-emerald-300">
+                    {review3Busy ? <LoaderCircle className="animate-spin" /> : <Sparkles />}
+                    {review3 ? 'Regenerate report' : 'Generate report'}
+                  </Button>
+                  <Button variant="outline" onClick={exportReview3Pdf} disabled={review3Busy} className="border-white/15 text-slate-200">
+                    <Download /> Export PDF
+                  </Button>
+                </div>
+              </div>
+              {review3Error && <p role="alert" className="mt-4 rounded-lg border border-red-300/20 bg-red-300/5 p-3 text-sm text-red-200">{review3Error}</p>}
+              {review3 && (
+                <div className="mt-5 space-y-5">
+                  <p className="rounded-lg border border-white/10 bg-white/[0.03] p-3 text-xs text-slate-300">{review3.generationMethod} · LLM status: {review3.llmStatus}</p>
+                  {([['Executive summary', review3.summary], ['Chronological attack story', review3.story]] as [string, CitedClaim[]][]).map(([title, claims]) => (
+                    <div key={title}>
+                      <h3 className="mb-3 text-sm font-semibold text-emerald-200">{title}</h3>
+                      <ol className="space-y-2">
+                        {claims.map((claim) => <li key={claim.id} className="rounded-lg border border-white/10 bg-[#10221f] p-3 text-sm leading-6 text-slate-200">
+                          <span className="mr-2 font-mono text-xs text-emerald-300">[{claim.id}]</span>{claim.text}
+                          <div className="mt-1 text-xs text-slate-500">{claim.kind} · {claim.citations.map((ref) => `${ref.sourceFile}${ref.eventId ? ` / ${ref.eventId}` : ''} / SHA-256 ${ref.sha256.slice(0, 16)}…`).join('; ')}</div>
+                        </li>)}
+                      </ol>
+                    </div>
+                  ))}
+                  {([['Model detections', review3.detections], ['MITRE ATT&CK mappings', review3.mitre], ['SHAP explanations', review3.shap], ['Missing evidence and recommendations', review3.missingEvidence], ['Verified evidence inventory', review3.inventory]] as [string, CitedClaim[]][]).map(([title, claims]) => (
+                    <details key={title} className="rounded-lg border border-white/10 p-3">
+                      <summary className="cursor-pointer text-sm font-semibold text-emerald-200">{title} ({claims.length})</summary>
+                      <ul className="mt-3 space-y-3">{claims.map((claim) => <li key={claim.id} className="text-sm leading-6 text-slate-300">
+                        <span className="font-mono text-emerald-300">[{claim.id}]</span> {claim.text}
+                        <div className="text-xs text-slate-500">{claim.kind} · {claim.citations.map((ref) => `${ref.sourceFile}${ref.eventId ? ` / ${ref.eventId}` : ''} / SHA-256 ${ref.sha256.slice(0, 16)}…`).join('; ')}</div>
+                      </li>)}</ul>
+                    </details>
+                  ))}
+                  <div className="rounded-lg border border-amber-300/15 bg-amber-300/[0.04] p-3 text-sm text-slate-300">
+                    <strong className="text-amber-200">Limitations:</strong> {review3.limitations.join(' ')}
+                    <p className="mt-2"><strong className="text-amber-200">Conclusion:</strong> {review3.conclusion}</p>
+                  </div>
+                </div>
+              )}
+              <div className="mt-6 border-t border-white/10 pt-5">
+                <label htmlFor="investigation-question" className="text-sm font-semibold text-emerald-200">Ask about this investigation</label>
+                <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                  <input id="investigation-question" value={question} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === 'Enter') void askInvestigation(); }} placeholder="What evidence supports the detected activity?" className="min-w-0 flex-1 rounded-lg border border-white/15 bg-[#071410] px-3 py-2 text-sm text-white outline-none focus:border-emerald-400" />
+                  <Button onClick={askInvestigation} disabled={review3Busy || question.trim().length < 3} className="bg-emerald-400 text-[#07100f] hover:bg-emerald-300">Ask</Button>
+                </div>
+                {answer && <div className="mt-3 rounded-lg border border-white/10 bg-[#10221f] p-3 text-sm leading-6 text-slate-200">
+                  <p>{answer.answer}</p><p className="mt-2 text-xs text-slate-500">{answer.llmStatus} · {answer.claims.flatMap((claim) => claim.citations.map((ref) => `${claim.id}: ${ref.sourceFile} / SHA-256 ${ref.sha256.slice(0, 16)}…`)).join('; ')}</p>
+                </div>}
               </div>
             </section>
             <section className="rounded-2xl border border-white/10 bg-[#0d1b19] p-5">

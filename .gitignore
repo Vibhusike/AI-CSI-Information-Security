@@ -9,13 +9,15 @@ dist/
 __pycache__/
 .pytest_cache/
 *.pyc
+*.tsbuildinfo
+work/
 # Local credentials and configuration
 .env
 .env.*
 *.pem
 *.key
 # Downloaded data and generated experiment outputs
-data/
+/data/
 results/
 backend/data/beth*.zip
 backend/data/labelled_*.csv

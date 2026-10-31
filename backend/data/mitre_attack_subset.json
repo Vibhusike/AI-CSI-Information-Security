@@ -1,0 +1,26 @@
+{
+  "source": "MITRE ATT&CK Enterprise",
+  "version": "19.2",
+  "source_url": "https://attack.mitre.org/versions/v19/",
+  "license": "CC BY 4.0",
+  "retrieved": "2026-09-23",
+  "techniques": [
+    {"id":"T1566.002","name":"Spearphishing Link","tactic":"Initial Access","patterns":["phish","malicious_link","email_header"]},
+    {"id":"T1110","name":"Brute Force","tactic":"Credential Access","patterns":["brute_force","failed_login","mfa_fatigue"]},
+    {"id":"T1078","name":"Valid Accounts","tactic":"Initial Access","patterns":["impossible_travel","successful_login","oauth_token","credential_access"]},
+    {"id":"T1114.003","name":"Email Forwarding Rule","tactic":"Collection","patterns":["mailbox_rule","email_forward"]},
+    {"id":"T1059.001","name":"PowerShell","tactic":"Execution","patterns":["powershell"]},
+    {"id":"T1204.002","name":"Malicious File","tactic":"Execution","patterns":["attachment_opened","user_execution"]},
+    {"id":"T1547.001","name":"Registry Run Keys / Startup Folder","tactic":"Persistence","patterns":["registry_run","startup_persistence"]},
+    {"id":"T1486","name":"Data Encrypted for Impact","tactic":"Impact","patterns":["ransomware","file_encryption"]},
+    {"id":"T1055","name":"Process Injection","tactic":"Privilege Escalation","patterns":["process_injection"]},
+    {"id":"T1562.001","name":"Impair Defenses","tactic":"Defense Impairment","patterns":["defense_impairment","disable_security"]},
+    {"id":"T1068","name":"Exploitation for Privilege Escalation","tactic":"Privilege Escalation","patterns":["privilege","admin_grant"]},
+    {"id":"T1074","name":"Data Staged","tactic":"Collection","patterns":["database_dump","archive","data_staging","sensitive_file"]},
+    {"id":"T1071.004","name":"DNS","tactic":"Command and Control","patterns":["dns_tunnel"]},
+    {"id":"T1041","name":"Exfiltration Over C2 Channel","tactic":"Exfiltration","patterns":["exfil","large_upload","cloud_upload"]},
+    {"id":"T1046","name":"Network Service Discovery","tactic":"Discovery","patterns":["scan","recon"]},
+    {"id":"T1071.001","name":"Web Protocols","tactic":"Command and Control","patterns":["suspicious_outbound","callback","beacon","process_network_connection"]},
+    {"id":"T1021","name":"Remote Services","tactic":"Lateral Movement","patterns":["lateral_movement","remote_service"]}
+  ]
+}
