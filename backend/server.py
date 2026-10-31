@@ -3,6 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 import re
 from pathlib import Path
+from threading import Lock
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
@@ -57,9 +58,18 @@ app.add_middleware(
 )
 
 
+_models_lock = Lock()
+
+
 @lru_cache(maxsize=1)
-def get_models() -> ModelBundle:
+def _load_models() -> ModelBundle:
     return ModelBundle()
+
+
+def get_models() -> ModelBundle:
+    # lru_cache alone can call the loader more than once under concurrent requests.
+    with _models_lock:
+        return _load_models()
 
 
 @app.get("/api/health")

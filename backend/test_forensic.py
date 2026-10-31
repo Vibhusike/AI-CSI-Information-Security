@@ -33,6 +33,9 @@ def test_cited_report_and_chronology(investigation, monkeypatch):
                for section in ("summary", "story", "detections", "mitre", "shap", "missingEvidence", "inventory") for claim in report[section])
     assert all(claim["kind"] == "observed" for claim in report["story"])
     assert report["inventory"][0]["citations"][0]["sha256"] == investigation["artifacts"][0]["sha256"]
+    assert report["story"][0]["text"].startswith("The records begin")
+    assert investigation["events"][0]["id"] not in report["story"][0]["text"]
+    assert "Model detections and ATT&CK mappings" in report["limitations"][0]
 
 
 def test_llm_hallucinated_text_and_unknown_references_are_discarded(investigation, monkeypatch):
@@ -54,13 +57,22 @@ def test_failed_llm_and_unsupported_question(investigation, monkeypatch):
     monkeypatch.setenv("AICSI_LLM_PROVIDER", "ollama")
     monkeypatch.setattr(forensic.httpx, "post", fail)
     report = forensic.build_review3(investigation)
-    assert report["summary"] and "fallback" in report["generationMethod"]
+    assert report["summary"] and "AI assistance unavailable" in report["generationMethod"]
     answer = forensic.answer_question(investigation, "quasar nebula spacecraft")
     assert not answer["claims"]
-    assert "does not support" in answer["answer"]
+    assert "cannot answer" in answer["answer"]
     supported = forensic.answer_question(investigation, "Which login event was suspicious?")
     assert supported["claims"]
     assert all(claim["citations"] for claim in supported["claims"])
+    assert supported["answer"].startswith("Here is what the available evidence shows.")
+
+
+def test_chronological_question_excludes_anchor_and_keeps_source_order(investigation, monkeypatch):
+    monkeypatch.setenv("AICSI_LLM_PROVIDER", "disabled")
+    answer = forensic.answer_question(investigation, "What happened after the successful login?")
+    assert answer["answer"].startswith("After that event")
+    assert [claim["id"] for claim in answer["claims"]] == ["E2", "E3", "E4"]
+    assert all(claim["citations"] for claim in answer["claims"])
 
 
 def test_api_rejects_stale_hash_and_pdf_has_citations(investigation, monkeypatch):

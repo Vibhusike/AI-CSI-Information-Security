@@ -9,6 +9,7 @@ import io
 import json
 import os
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -21,11 +22,39 @@ def _ref(event: dict[str, Any]) -> dict[str, str]:
             "sourceFile": event["sourceFile"], "sha256": event["provenanceHash"]}
 
 
+def _event_label(event: dict[str, Any]) -> str:
+    return event["eventType"].replace("_", " ").lower()
+
+
+def _event_time(event: dict[str, Any]) -> str:
+    date = datetime.strptime(event["timestamp"][:10], "%Y-%m-%d").strftime("%d %b %Y")
+    return f"{event['timestamp'][11:16]} UTC on {date}"
+
+
+def _friendly_event(event: dict[str, Any], first: bool = False) -> str:
+    opening = "The records begin" if first else "The next record appears"
+    sentence = f"{opening} at {_event_time(event)} with {_event_label(event)}"
+    if event.get("user"):
+        sentence += f" for {event['user']}"
+    if event.get("host"):
+        sentence += f" on {event['host']}"
+    if event.get("srcIp"):
+        sentence += f" from {event['srcIp']}"
+    if event.get("dstIp"):
+        sentence += f" to {event['dstIp']}"
+    if event.get("process"):
+        sentence += f" using {event['process']}"
+    if event.get("resource"):
+        sentence += f", involving {event['resource']}"
+    return sentence + "."
+
+
 def claims_for(analysis: dict[str, Any]) -> list[dict[str, Any]]:
     claims: list[dict[str, Any]] = []
     for index, artifact in enumerate(analysis["artifacts"], 1):
         claims.append({"id": f"A{index}", "kind": "observed", "section": "inventory",
                        "text": f"{artifact['name']} was ingested as {artifact['type']} with {artifact['rowCount']} parsed rows. Its SHA-256 was independently verified: {artifact['sha256']}.",
+                       "friendly": f"We reviewed {artifact['name']} and verified its SHA-256 hash. It contains {artifact['rowCount']} parsed records.",
                        "citations": [{"artifactId": artifact["id"], "sourceFile": artifact["name"], "sha256": artifact["sha256"]}]})
     for index, event in enumerate(analysis["events"], 1):
         facts = [event["eventType"].replace("_", " ")]
@@ -34,24 +63,32 @@ def claims_for(analysis: dict[str, Any]) -> list[dict[str, Any]]:
                 facts.append(f"{label} {event[key]}")
         ref = _ref(event)
         claims.append({"id": f"E{index}", "kind": "observed", "section": "timeline", "timestamp": event["timestamp"],
-                       "text": f"At {event['timestamp']}, {', '.join(facts)} was recorded in {event['sourceFile']}.", "citations": [ref]})
+                       "text": f"At {event['timestamp']}, {', '.join(facts)} was recorded in {event['sourceFile']}.",
+                       "friendly": _friendly_event(event, first=index == 1), "citations": [ref]})
         if event["classification"] != "NORMAL":
             claims.append({"id": f"D{index}", "kind": "model inference", "section": "detections", "timestamp": event["timestamp"],
-                           "text": f"The existing XGBoost model classified event {event['id']} as {event['classification']} with winning-class probability {event['classificationProbability']:.1%}.", "citations": [ref]})
+                           "text": f"The existing XGBoost model classified event {event['id']} as {event['classification']} with winning-class probability {event['classificationProbability']:.1%}.",
+                           "friendly": f"The model gave the {_event_label(event)} at {_event_time(event)} a {event['classification'].lower()} label, with a score of {event['classificationProbability']:.1%}. This is a lead to investigate, not a confirmed finding.",
+                           "citations": [ref]})
         for mapping in event["mitre"]:
             claims.append({"id": f"T{index}-{mapping['techniqueId']}", "kind": "rule mapping", "section": "mitre", "timestamp": event["timestamp"],
-                           "text": f"Event {event['id']} maps by the existing rule set to MITRE ATT&CK {mapping['techniqueId']} ({mapping['technique']}; {mapping['tactic']}).", "citations": [ref]})
+                           "text": f"Event {event['id']} maps by the existing rule set to MITRE ATT&CK {mapping['techniqueId']} ({mapping['technique']}; {mapping['tactic']}).",
+                           "friendly": f"The rule-based mapping links the {_event_label(event)} at {_event_time(event)} to MITRE ATT&CK {mapping['techniqueId']} ({mapping['technique']}, {mapping['tactic']}).",
+                           "citations": [ref]})
         if event.get("shap") and event["classification"] != "NORMAL":
             top = sorted(event["shap"], key=lambda item: abs(item["value"]), reverse=True)[:3]
             detail = ", ".join(f"{item['feature']} ({item['value']:+.3f})" for item in top)
             claims.append({"id": f"S{index}", "kind": "model explanation", "section": "shap",
-                           "text": f"For event {event['id']}, the largest absolute TreeSHAP feature contributions were {detail}. These explain the model score, not causation.", "citations": [ref]})
+                           "text": f"For event {event['id']}, the largest absolute TreeSHAP feature contributions were {detail}. These explain the model score, not causation.",
+                           "friendly": f"For the {_event_label(event)} at {_event_time(event)}, SHAP points most strongly to {detail}. These values explain the model's score; they do not prove a cause.",
+                           "citations": [ref]})
     for index, item in enumerate(analysis["recommendations"], 1):
         supporting = [claim["citations"][0] for claim in claims if claim["section"] == "mitre" and any(t in claim["id"] for t in item["techniques"])]
         if not supporting:
             supporting = [claim["citations"][0] for claim in claims if claim["section"] == "inventory"]
         claims.append({"id": f"M{index}", "kind": "evidence gap", "section": "missing",
                        "text": f"{item['label']} is missing for mapped techniques {', '.join(item['techniques'])}. Collection may confirm or refute the current interpretation. Recommendation score: {item['recommendationScore']:.1f}.",
+                       "friendly": f"To check the current interpretation, collect {item['label'].lower()}. That evidence may confirm or challenge the mapping to {', '.join(item['techniques'])}.",
                        "citations": supporting[:3]})
     return claims
 
@@ -105,7 +142,7 @@ def _llm_select(prompt: str, allowed: list[str], limit: int) -> tuple[list[str],
 
 
 def _format(claim: dict[str, Any]) -> dict[str, Any]:
-    return {"id": claim["id"], "kind": claim["kind"], "text": claim["text"], "citations": claim["citations"]}
+    return {"id": claim["id"], "kind": claim["kind"], "text": claim.get("friendly", claim["text"]), "citations": claim["citations"]}
 
 
 def build_review3(analysis: dict[str, Any]) -> dict[str, Any]:
@@ -118,8 +155,12 @@ def build_review3(analysis: dict[str, Any]) -> dict[str, Any]:
     by_id = {c["id"]: c for c in claims}
     timeline = [c for c in claims if c["section"] == "timeline"]
     detections = [c for c in claims if c["section"] == "detections"]
+    limitations = ["Model detections and ATT&CK mappings are investigative leads; they do not prove who caused the activity.",
+                   "Missing evidence could change this interpretation, so the reconstruction is not yet complete."]
+    if analysis["droppedRows"]:
+        limitations.append(f"The timeline excludes {analysis['droppedRows']} records without a usable timestamp.")
     return {"caseId": analysis["caseId"], "analysedAt": analysis["analysedAt"], "llmStatus": status,
-            "generationMethod": "LLM claim selection with deterministic evidence-grounded rendering" if status == "ready" else "Deterministic evidence-grounded fallback; LLM " + status,
+            "generationMethod": "AI selected evidence-backed findings for this report" if status == "ready" else "Evidence-backed report; AI assistance " + status,
             "summary": [_format(by_id[c]) for c in selected],
             "story": [_format(c) for c in timeline], "detections": [_format(c) for c in detections],
             "mitre": [_format(c) for c in claims if c["section"] == "mitre"],
@@ -127,18 +168,25 @@ def build_review3(analysis: dict[str, Any]) -> dict[str, Any]:
             "missingEvidence": [_format(c) for c in claims if c["section"] == "missing"],
             "inventory": [_format(c) for c in claims if c["section"] == "inventory"],
             "confidence": analysis["confidence"], "droppedRows": analysis["droppedRows"],
-            "limitations": ["Event labels, ATT&CK mappings, and SHAP values are model or rule interpretations, not direct observations.",
-                            f"{analysis['droppedRows']} rows lacked usable timestamps and were excluded from the event timeline.",
-                            "Missing evidence can change the current interpretation; no claim of complete reconstruction is made."],
-            "conclusion": "The cited observations support the listed detections and mappings as investigative leads. Review the source artifacts and collect missing evidence before making a final attribution."}
+            "limitations": limitations,
+            "conclusion": "Taken together, these records give investigators a useful starting picture. Check the cited files and collect the missing sources before drawing a final conclusion."}
 
 
 def answer_question(analysis: dict[str, Any], question: str) -> dict[str, Any]:
     claims = claims_for(analysis)
-    terms = set(re.findall(r"[a-z0-9.]+", question.lower())) - {"what", "when", "where", "which", "were", "about", "this", "that", "does", "show", "case", "have", "did", "the", "and", "for", "from", "with", "are", "was"}
+    terms = set(re.findall(r"[a-z0-9.]+", question.lower())) - {"what", "when", "where", "which", "were", "about", "this", "that", "does", "show", "case", "have", "did", "the", "and", "for", "from", "with", "are", "was", "happened", "after", "before"}
     candidates = [c for c in claims if terms and any(term in c["text"].lower() or term in c["id"].lower() for term in terms)]
+    direction = "after" if re.search(r"\bafter\b", question, re.I) else "before" if re.search(r"\bbefore\b", question, re.I) else ""
+    if direction and analysis["events"]:
+        ranked = sorted(enumerate(analysis["events"]), key=lambda pair: (-sum(term in _event_label(pair[1]) for term in terms), pair[0]))
+        if ranked and any(term in _event_label(ranked[0][1]) for term in terms):
+            anchor_time = ranked[0][1]["timestamp"]
+            candidates = [c for c in claims if c["section"] == "timeline" and
+                          (c["timestamp"] > anchor_time if direction == "after" else c["timestamp"] < anchor_time)]
+        else:
+            direction = ""
     if not candidates:
-        return {"answer": "The current evidence does not support an answer to that question.", "claims": [], "llmStatus": "insufficient evidence"}
+        return {"answer": "I cannot answer that from the evidence in this case yet. Try adding a relevant source and running the analysis again.", "claims": [], "llmStatus": "insufficient evidence"}
     pool = candidates[:60]
     prompt = f"Question: {question}\nSelect up to 5 directly relevant claim IDs. Claims: " + json.dumps([{"id": c["id"], "text": c["text"]} for c in pool])
     selected, status = _llm_select(prompt, [c["id"] for c in pool], 5)
@@ -146,7 +194,11 @@ def answer_question(analysis: dict[str, Any], question: str) -> dict[str, Any]:
         selected = [c["id"] for c in pool[:3]]
     by_id = {c["id"]: c for c in pool}
     rendered = [_format(by_id[c]) for c in selected]
-    return {"answer": " ".join(f"{c['text']} [{c['id']}]" for c in rendered), "claims": rendered, "llmStatus": status}
+    if direction:
+        order = {claim["id"]: index for index, claim in enumerate(pool)}
+        rendered.sort(key=lambda claim: order[claim["id"]])
+    introduction = f"{direction.capitalize()} that event, the available records show: " if direction else "Here is what the available evidence shows. "
+    return {"answer": introduction + " ".join(f"{c['text']} [{c['id']}]" for c in rendered), "claims": rendered, "llmStatus": status}
 
 
 def render_pdf(report: dict[str, Any]) -> bytes:
@@ -168,23 +220,24 @@ def render_pdf(report: dict[str, Any]) -> bytes:
     flow = [Paragraph("AI-CSI Forensic Investigation Report", styles["CoverTitle"]),
             Paragraph(f"Case {escape(report['caseId'])} | Analysis {escape(report['analysedAt'])}", styles["BodyCustom"]),
             Paragraph(escape(report["generationMethod"]), styles["SmallCustom"]), Spacer(1, 8)]
-    sections = [("Executive summary", "summary"), ("Verified SHA-256 evidence inventory", "inventory"),
-                ("Chronological attack story - observed events", "story"), ("Model detections - inferences", "detections"),
-                ("MITRE ATT&CK rule mappings", "mitre"), ("TreeSHAP model explanations", "shap"),
-                ("Missing evidence and recommendations", "missingEvidence")]
+    sections = [("The short version", "summary"), ("Evidence reviewed and verified", "inventory"),
+                ("How the events unfolded", "story"), ("What the model flagged", "detections"),
+                ("How activity maps to MITRE ATT&CK", "mitre"), ("What influenced the model", "shap"),
+                ("Evidence that would help next", "missingEvidence")]
     for title, key in sections:
         flow.append(Paragraph(title, styles["SectionCustom"]))
         if not report[key]:
-            flow.append(Paragraph("No supported entries in this section.", styles["BodyCustom"]))
+            flow.append(Paragraph("The current evidence does not support a finding here.", styles["BodyCustom"]))
         for claim in report[key]:
             citations = "; ".join(f"{r['sourceFile']} / {r.get('eventId', r['artifactId'])} / SHA-256 {r['sha256'][:16]}..." for r in claim["citations"])
-            flow.append(KeepTogether([Paragraph(f"<b>[{escape(claim['id'])}] {escape(claim['kind'])}:</b> {escape(claim['text'])}", styles["BodyCustom"]),
-                                      Paragraph("Sources: " + escape(citations), styles["SmallCustom"])]))
-    flow.append(Paragraph("Confidence and limitations", styles["SectionCustom"]))
-    flow.append(Paragraph(escape(report["confidence"]["calculation"]), styles["BodyCustom"]))
+            flow.append(KeepTogether([Paragraph(escape(claim['text']) + f" <font color='#087f74'>[{escape(claim['id'])}]</font>", styles["BodyCustom"]),
+                                      Paragraph("Evidence: " + escape(citations), styles["SmallCustom"])]))
+    flow.append(Paragraph("Confidence and what remains uncertain", styles["SectionCustom"]))
+    flow.append(Paragraph(f"Current evidential support is {report['confidence']['overall']:.1f}% ({escape(report['confidence']['label'].lower())}). This score describes support in the available evidence, not certainty about the incident.", styles["BodyCustom"]))
+    flow.append(Paragraph(escape(report["confidence"]["calculation"]), styles["SmallCustom"]))
     for limitation in report["limitations"]:
-        flow.append(Paragraph("- " + escape(limitation), styles["BodyCustom"]))
-    flow.append(Paragraph("Conclusion", styles["SectionCustom"]))
+        flow.append(Paragraph(escape(limitation), styles["BodyCustom"]))
+    flow.append(Paragraph("Overall assessment", styles["SectionCustom"]))
     flow.append(Paragraph(escape(report["conclusion"]), styles["BodyCustom"]))
     flow.append(Paragraph("Appendix: full source hashes and citation key", styles["SectionCustom"]))
     for claim in report["inventory"]:
