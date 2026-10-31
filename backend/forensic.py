@@ -187,11 +187,14 @@ def answer_question(analysis: dict[str, Any], question: str) -> dict[str, Any]:
             direction = ""
     if not candidates:
         return {"answer": "I cannot answer that from the evidence in this case yet. Try adding a relevant source and running the analysis again.", "claims": [], "llmStatus": "insufficient evidence"}
-    pool = candidates[:60]
+    pool = candidates[:5] if direction == "after" else candidates[-5:] if direction == "before" else candidates[:60]
     prompt = f"Question: {question}\nSelect up to 5 directly relevant claim IDs. Claims: " + json.dumps([{"id": c["id"], "text": c["text"]} for c in pool])
     selected, status = _llm_select(prompt, [c["id"] for c in pool], 5)
     if not selected:
         selected = [c["id"] for c in pool[:3]]
+    if direction:
+        nearest = pool[:2] if direction == "after" else pool[-2:]
+        selected = list(dict.fromkeys([c["id"] for c in nearest] + selected))[:5]
     by_id = {c["id"]: c for c in pool}
     rendered = [_format(by_id[c]) for c in selected]
     if direction:

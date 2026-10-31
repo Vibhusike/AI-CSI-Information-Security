@@ -73,6 +73,9 @@ def test_chronological_question_excludes_anchor_and_keeps_source_order(investiga
     assert answer["answer"].startswith("After that event")
     assert [claim["id"] for claim in answer["claims"]] == ["E2", "E3", "E4"]
     assert all(claim["citations"] for claim in answer["claims"])
+    monkeypatch.setattr(forensic, "_llm_select", lambda prompt, allowed, limit: ([allowed[-1]], "ready"))
+    selected = forensic.answer_question(investigation, "What happened after the successful login?")
+    assert [claim["id"] for claim in selected["claims"]] == ["E2", "E3", "E5"]
 
 
 def test_api_rejects_stale_hash_and_pdf_has_citations(investigation, monkeypatch):
