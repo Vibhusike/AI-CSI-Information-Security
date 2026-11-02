@@ -1,0 +1,2 @@
+timestamp,event_type,status,host,user,src_ip,dst_ip,resource,message
+2026-01-12T10:15:00Z,large_upload,allowed,lab-web-01,svc_dispute,10.0.4.12,198.51.100.88,HTTPS_443,Synthetic encrypted outbound transfer of the staged test bundle to a documentation-range address

@@ -67,6 +67,14 @@ def test_failed_llm_and_unsupported_question(investigation, monkeypatch):
     assert supported["answer"].startswith("Here is what the available evidence shows.")
 
 
+def test_question_does_not_turn_lab_evidence_into_real_incident_proof(investigation, monkeypatch):
+    monkeypatch.setenv("AICSI_LLM_PROVIDER", "disabled")
+    answer = forensic.answer_question(investigation, "Did this prove Equifax data was stolen?")
+    assert answer["llmStatus"] == "insufficient evidence"
+    assert not answer["claims"]
+    assert "cannot establish facts about Equifax" in answer["answer"]
+
+
 def test_chronological_question_excludes_anchor_and_keeps_source_order(investigation, monkeypatch):
     monkeypatch.setenv("AICSI_LLM_PROVIDER", "disabled")
     answer = forensic.answer_question(investigation, "What happened after the successful login?")

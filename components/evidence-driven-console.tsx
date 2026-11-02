@@ -256,7 +256,22 @@ type Sample = {
 };
 
 const root = '/sample-data/review2';
+const review3Root = '/sample-data/review3';
 const samples: Sample[] = [
+  {
+    id: 'equifax-pattern',
+    title: 'Equifax-pattern case study (synthetic)',
+    description: 'Safe lab logs inspired by public incident reporting, never actual Equifax evidence.',
+    initial: [
+      { url: `${review3Root}/equifax_pattern_proxy.csv`, name: 'Lab-Web-Proxy.csv', type: 'proxy' },
+      { url: `${review3Root}/equifax_pattern_sysmon.csv`, name: 'Lab-Sysmon.csv', type: 'sysmon' },
+      { url: `${review3Root}/equifax_pattern_auth.csv`, name: 'Lab-Authentication.csv', type: 'endpoint_auth' },
+      { url: `${review3Root}/equifax_pattern_firewall.csv`, name: 'Lab-Firewall.csv', type: 'firewall' },
+    ],
+    optional: [
+      { url: `${review3Root}/equifax_pattern_pcap.json`, name: 'Lab-PCAP-Metadata.json', type: 'pcap' },
+    ],
+  },
   {
     id: 'phishing',
     title: 'Phishing / Credential Compromise',

@@ -1,0 +1,325 @@
+{
+  "notice": "Inert synthetic Equifax-pattern lab logs, not historical Equifax evidence. Times and hosts are invented for testing.",
+  "model": "Existing saved three-class AI-CSI XGBoost model; no retraining",
+  "tamperedEvidenceResult": "Evidence SHA-256 mismatch for equifax_pattern_proxy.csv; analysis rejected.",
+  "stages": {
+    "web_proxy_only": {
+      "artifacts": [
+        {
+          "name": "equifax_pattern_proxy.csv",
+          "type": "proxy",
+          "sha256": "176a54b6e02d5051ff64bd21cbc268f3269bf038fa9600d9bcba55820d211120",
+          "rows": 1,
+          "provenance": 1.0
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-12T10:00:00Z",
+          "eventType": "struts_exploit_attempt",
+          "sourceFile": "equifax_pattern_proxy.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.8702,
+          "mappedTechniques": []
+        }
+      ],
+      "caseHypothesis": "No supported attack hypothesis",
+      "mappedTechniques": [],
+      "graphNodes": 8,
+      "graphEdges": 7,
+      "confidence": {
+        "evidenceCoverage": 0,
+        "modelConfidence": 0.8702,
+        "temporalCoherence": 0.0,
+        "provenanceIntegrity": 1.0,
+        "overall": 36.8,
+        "label": "Low",
+        "calculation": "100 \u00d7 [(0.35 \u00d7 0.0000) + (0.25 \u00d7 0.8702) + (0.25 \u00d7 0.0000) + (0.15 \u00d7 1.0000)] = 36.8%",
+        "modelDetails": {
+          "model": "XGBoost XGBClassifier",
+          "input": "768-dimensional DistilBERT embedding + 10 structured features",
+          "eventsAggregated": 1,
+          "aggregation": "Mean winning-class probability across non-normal events; all events if no non-normal prediction."
+        },
+        "temporalDetails": {
+          "chronology": 0.0,
+          "transitionSupport": 0.0,
+          "entityContinuity": 0.0,
+          "correlationDensity": 0.0,
+          "eventsEvaluated": 0
+        },
+        "provenanceDetails": {
+          "artifactsPassedAllChecks": 1,
+          "artifactCount": 1,
+          "aggregation": "Mean of five implemented checks per artifact."
+        }
+      },
+      "topMissingEvidence": [],
+      "citedClaimCount": 5,
+      "allClaimsCitedToVerifiedHashes": true
+    },
+    "four_source_replay": {
+      "artifacts": [
+        {
+          "name": "equifax_pattern_proxy.csv",
+          "type": "proxy",
+          "sha256": "176a54b6e02d5051ff64bd21cbc268f3269bf038fa9600d9bcba55820d211120",
+          "rows": 1,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_sysmon.csv",
+          "type": "sysmon",
+          "sha256": "d54422337a3e235ab65bba268c852149201e315b72aaf3f5dc24949170ae3cdf",
+          "rows": 2,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_auth.csv",
+          "type": "endpoint_auth",
+          "sha256": "5bdf8b3c8601e633738d23632f0a6e3179b577ace51fade8e523e2e51131b4b4",
+          "rows": 1,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_firewall.csv",
+          "type": "firewall",
+          "sha256": "cb038f1d15155c0f09fe29aaefe885e65befd4965ed2d6c08bfd0e57dd8738ed",
+          "rows": 1,
+          "provenance": 1.0
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-12T10:00:00Z",
+          "eventType": "struts_exploit_attempt",
+          "sourceFile": "equifax_pattern_proxy.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.8702,
+          "mappedTechniques": []
+        },
+        {
+          "time": "2026-01-12T10:02:00Z",
+          "eventType": "web_server_child_process",
+          "sourceFile": "equifax_pattern_sysmon.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.8179,
+          "mappedTechniques": []
+        },
+        {
+          "time": "2026-01-12T10:07:00Z",
+          "eventType": "successful_login",
+          "sourceFile": "equifax_pattern_auth.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.7728,
+          "mappedTechniques": [
+            "T1078"
+          ]
+        },
+        {
+          "time": "2026-01-12T10:12:00Z",
+          "eventType": "database_dump",
+          "sourceFile": "equifax_pattern_sysmon.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.6828,
+          "mappedTechniques": [
+            "T1074"
+          ]
+        },
+        {
+          "time": "2026-01-12T10:15:00Z",
+          "eventType": "large_upload",
+          "sourceFile": "equifax_pattern_firewall.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.9211,
+          "mappedTechniques": [
+            "T1041"
+          ]
+        }
+      ],
+      "caseHypothesis": "Data staging and exfiltration",
+      "mappedTechniques": [
+        "T1078",
+        "T1074",
+        "T1041"
+      ],
+      "graphNodes": 25,
+      "graphEdges": 43,
+      "confidence": {
+        "evidenceCoverage": 0.6688,
+        "modelConfidence": 0.813,
+        "temporalCoherence": 1.0,
+        "provenanceIntegrity": 1.0,
+        "overall": 83.7,
+        "label": "High",
+        "calculation": "100 \u00d7 [(0.35 \u00d7 0.6688) + (0.25 \u00d7 0.8130) + (0.25 \u00d7 1.0000) + (0.15 \u00d7 1.0000)] = 83.7%",
+        "modelDetails": {
+          "model": "XGBoost XGBClassifier",
+          "input": "768-dimensional DistilBERT embedding + 10 structured features",
+          "eventsAggregated": 5,
+          "aggregation": "Mean winning-class probability across non-normal events; all events if no non-normal prediction."
+        },
+        "temporalDetails": {
+          "chronology": 1.0,
+          "transitionSupport": 1.0,
+          "entityContinuity": 1.0,
+          "correlationDensity": 1.0,
+          "eventsEvaluated": 3,
+          "formula": "0.20 chronology + 0.35 supported transitions + 0.30 entity continuity + 0.15 correlation density"
+        },
+        "provenanceDetails": {
+          "artifactsPassedAllChecks": 4,
+          "artifactCount": 4,
+          "aggregation": "Mean of five implemented checks per artifact."
+        }
+      },
+      "topMissingEvidence": [
+        "Network packet capture",
+        "Endpoint detection telemetry",
+        "DNS query logs"
+      ],
+      "citedClaimCount": 31,
+      "allClaimsCitedToVerifiedHashes": true
+    },
+    "with_pcap_metadata": {
+      "artifacts": [
+        {
+          "name": "equifax_pattern_proxy.csv",
+          "type": "proxy",
+          "sha256": "176a54b6e02d5051ff64bd21cbc268f3269bf038fa9600d9bcba55820d211120",
+          "rows": 1,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_sysmon.csv",
+          "type": "sysmon",
+          "sha256": "d54422337a3e235ab65bba268c852149201e315b72aaf3f5dc24949170ae3cdf",
+          "rows": 2,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_auth.csv",
+          "type": "endpoint_auth",
+          "sha256": "5bdf8b3c8601e633738d23632f0a6e3179b577ace51fade8e523e2e51131b4b4",
+          "rows": 1,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_firewall.csv",
+          "type": "firewall",
+          "sha256": "cb038f1d15155c0f09fe29aaefe885e65befd4965ed2d6c08bfd0e57dd8738ed",
+          "rows": 1,
+          "provenance": 1.0
+        },
+        {
+          "name": "equifax_pattern_pcap.json",
+          "type": "pcap",
+          "sha256": "7392c813de6ec7aa8a6ed22f40a8ee4b54b4e00f31ed9e3266bea80237fcf934",
+          "rows": 1,
+          "provenance": 1.0
+        }
+      ],
+      "events": [
+        {
+          "time": "2026-01-12T10:00:00Z",
+          "eventType": "struts_exploit_attempt",
+          "sourceFile": "equifax_pattern_proxy.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.8702,
+          "mappedTechniques": []
+        },
+        {
+          "time": "2026-01-12T10:02:00Z",
+          "eventType": "web_server_child_process",
+          "sourceFile": "equifax_pattern_sysmon.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.8179,
+          "mappedTechniques": []
+        },
+        {
+          "time": "2026-01-12T10:07:00Z",
+          "eventType": "successful_login",
+          "sourceFile": "equifax_pattern_auth.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.7728,
+          "mappedTechniques": [
+            "T1078"
+          ]
+        },
+        {
+          "time": "2026-01-12T10:12:00Z",
+          "eventType": "database_dump",
+          "sourceFile": "equifax_pattern_sysmon.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.6828,
+          "mappedTechniques": [
+            "T1074"
+          ]
+        },
+        {
+          "time": "2026-01-12T10:15:00Z",
+          "eventType": "large_upload",
+          "sourceFile": "equifax_pattern_firewall.csv",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.9211,
+          "mappedTechniques": [
+            "T1041"
+          ]
+        },
+        {
+          "time": "2026-01-12T10:15:02Z",
+          "eventType": "suspicious_outbound_connection",
+          "sourceFile": "equifax_pattern_pcap.json",
+          "classification": "SUSPICIOUS",
+          "winningClassProbability": 0.909,
+          "mappedTechniques": [
+            "T1071.001"
+          ]
+        }
+      ],
+      "caseHypothesis": "Data staging and exfiltration",
+      "mappedTechniques": [
+        "T1078",
+        "T1074",
+        "T1041",
+        "T1071.001"
+      ],
+      "graphNodes": 28,
+      "graphEdges": 54,
+      "confidence": {
+        "evidenceCoverage": 0.7827,
+        "modelConfidence": 0.829,
+        "temporalCoherence": 0.9067,
+        "provenanceIntegrity": 1.0,
+        "overall": 85.8,
+        "label": "High",
+        "calculation": "100 \u00d7 [(0.35 \u00d7 0.7827) + (0.25 \u00d7 0.8290) + (0.25 \u00d7 0.9067) + (0.15 \u00d7 1.0000)] = 85.8%",
+        "modelDetails": {
+          "model": "XGBoost XGBClassifier",
+          "input": "768-dimensional DistilBERT embedding + 10 structured features",
+          "eventsAggregated": 6,
+          "aggregation": "Mean winning-class probability across non-normal events; all events if no non-normal prediction."
+        },
+        "temporalDetails": {
+          "chronology": 1.0,
+          "transitionSupport": 0.7333,
+          "entityContinuity": 1.0,
+          "correlationDensity": 1.0,
+          "eventsEvaluated": 4,
+          "formula": "0.20 chronology + 0.35 supported transitions + 0.30 entity continuity + 0.15 correlation density"
+        },
+        "provenanceDetails": {
+          "artifactsPassedAllChecks": 5,
+          "artifactCount": 5,
+          "aggregation": "Mean of five implemented checks per artifact."
+        }
+      },
+      "topMissingEvidence": [
+        "DNS query logs",
+        "Endpoint detection telemetry"
+      ],
+      "citedClaimCount": 35,
+      "allClaimsCitedToVerifiedHashes": true
+    }
+  }
+}

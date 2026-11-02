@@ -1,0 +1,2 @@
+timestamp,event_type,status,host,user,src_ip,dst_ip,url,resource,message
+2026-01-12T10:00:00Z,struts_exploit_attempt,error,lab-web-01,,203.0.113.10,10.0.4.12,https://dispute.example.test/upload,/dispute/upload,Synthetic anomalous upload request to a Struts-like public portal; no exploit payload is included

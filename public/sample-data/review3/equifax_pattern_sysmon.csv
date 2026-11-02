@@ -1,0 +1,3 @@
+timestamp,event_type,status,host,user,process,parent_process,src_ip,dst_ip,resource,message
+2026-01-12T10:02:00Z,web_server_child_process,alert,lab-web-01,svc_dispute,sh,java,10.0.4.12,,/dispute/upload,Synthetic web application child process after the anomalous request
+2026-01-12T10:12:00Z,database_dump,alert,lab-web-01,svc_dispute,db_export,sh,10.0.4.12,10.0.8.20,/tmp/lab_export.csv,Synthetic bulk records staged for transfer; no personal data is present

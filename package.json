@@ -15,6 +15,7 @@
     "lint": "oxlint app/page.tsx app/layout.tsx components/evidence-driven-console.tsx lib/evidence-client.ts",
     "test": "npm run test:backend",
     "test:backend": "PYTHONPATH=backend AICSI_ENABLE_NER=0 .venv/bin/python -m pytest backend/test_pipeline.py backend/test_forensic.py -q",
+    "test:case-study": "PYTHONPATH=backend .venv/bin/python backend/review3_case_study.py",
     "format": "oxfmt"
   },
   "dependencies": {

@@ -34,6 +34,22 @@ The dedicated `openai` provider uses OpenAI's Responses API with structured clai
 
 Run `npm run test:backend`, `npm run lint`, `./node_modules/.bin/tsc --noEmit`, and `npm run build` to verify the implementation. The reporting tests cover valid citations, chronological order, forged LLM findings and references, offline LLM fallback, stale evidence hashes, and PDF output.
 
+### Review 3 live demo and public-incident case study
+
+Start the local system with `npm run dev` and open <http://localhost:3000>. Choose **Load sample case** > **Equifax-pattern case study (synthetic)**. The four inert lab files show a public-portal request, web-server child process, service-account login, staged data, and outbound transfer. Choose **Generate report**, ask a question, inspect the source citations, and export PDF. Add the optional **Lab-PCAP-Metadata.json** to show how corroborating evidence changes the graph, recommendations, and confidence. The logs use invented 2026 timestamps, lab hosts, documentation-range IP addresses, and no personal data or exploit payload. They are *not* Equifax evidence.
+
+The real 2017 Equifax breach is documented by the [U.S. GAO](https://www.gao.gov/products/gao-18-559), the [U.S. House Oversight Committee](https://oversight.house.gov/wp-content/uploads/2018/12/Equifax-Report.pdf), and the [FTC](https://search.ftc.gov/business-guidance/blog/2019/07/575-million-equifax-settlement-illustrates-security-basics-your-business). Their findings motivate this pattern test. Historical incident facts and lab observations must be kept separate.
+
+Reproduce the exact lab replay without an LLM call or retraining:
+
+```bash
+npm run test:case-study
+```
+
+The command hashes each source, runs the existing saved model on a web-only view, a four-source view, and a five-source view with PCAP metadata, validates every report citation against a verified artifact hash, checks that a tampered file is rejected, and writes [`docs/review3_case_study_results.json`](docs/review3_case_study_results.json). In the committed run, the web-only view parsed 1 event, mapped no ATT&CK technique, and scored 36.8% evidential support. The four-source replay parsed 5 events, mapped T1078, T1074, and T1041, and scored 83.7%. Adding PCAP metadata parsed 6 events, added T1071.001, and scored 85.8%. These scores are outputs for invented test evidence; they are not reconstruction accuracy, incident probability, or evidence that AI-CSI would have stopped Equifax. The current ATT&CK subset omits T1190, so the public-facing exploitation stage has no technique mapping even when the test event is classified as suspicious.
+
+For the full measured model comparison, see the Review 2 results below and the separate BETH experiment described in the Team 23 Review 2 report. The BETH two-class host-held-out experiment is distinct from the saved three-class model used by this app and case-study replay.
+
 ## Review 2 baseline
 
 AI-CSI is a college-scale, evidence-centred cyber-investigation prototype. It ingests heterogeneous evidence, preserves provenance, normalizes events, extracts entities, classifies activity with a real ML pipeline, correlates observations in a NetworkX graph, reconstructs a timeline, maps behaviors to MITRE ATT&CK, calculates investigation confidence, recommends missing evidence, explains model predictions with SHAP, and produces a deterministic evidence-grounded report.

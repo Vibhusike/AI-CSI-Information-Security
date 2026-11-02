@@ -174,6 +174,15 @@ def build_review3(analysis: dict[str, Any]) -> dict[str, Any]:
 
 def answer_question(analysis: dict[str, Any], question: str) -> dict[str, Any]:
     claims = claims_for(analysis)
+    # A named victim or organisation cannot be inferred from a similar-looking lab trace.
+    named_subjects = [word for word in re.findall(r"\b[A-Z][a-z][A-Za-z0-9]+\b", question)
+                      if word.lower() not in {"what", "when", "where", "which", "were", "does", "did", "can", "could", "how", "who", "the", "this", "is", "are"}]
+    source_text = " ".join(c["text"] for c in claims).lower()
+    unknown_subjects = [word for word in named_subjects if word.lower() not in source_text]
+    if unknown_subjects:
+        subject = ", ".join(dict.fromkeys(unknown_subjects))
+        return {"answer": f"I cannot establish facts about {subject} from this investigation. None of the case evidence identifies that subject, so a similar-looking event is not proof of a historical incident.",
+                "claims": [], "llmStatus": "insufficient evidence"}
     terms = set(re.findall(r"[a-z0-9.]+", question.lower())) - {"what", "when", "where", "which", "were", "about", "this", "that", "does", "show", "case", "have", "did", "the", "and", "for", "from", "with", "are", "was", "happened", "after", "before"}
     candidates = [c for c in claims if terms and any(term in c["text"].lower() or term in c["id"].lower() for term in terms)]
     direction = "after" if re.search(r"\bafter\b", question, re.I) else "before" if re.search(r"\bbefore\b", question, re.I) else ""
