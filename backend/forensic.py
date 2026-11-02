@@ -216,7 +216,6 @@ def answer_question(analysis: dict[str, Any], question: str) -> dict[str, Any]:
 def render_pdf(report: dict[str, Any]) -> bytes:
     from reportlab.lib import colors
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.enums import TA_CENTER
     from reportlab.lib.pagesizes import A4
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, KeepTogether
     from xml.sax.saxutils import escape
@@ -251,10 +250,13 @@ def render_pdf(report: dict[str, Any]) -> bytes:
         flow.append(Paragraph(escape(limitation), styles["BodyCustom"]))
     flow.append(Paragraph("Overall assessment", styles["SectionCustom"]))
     flow.append(Paragraph(escape(report["conclusion"]), styles["BodyCustom"]))
-    flow.append(Paragraph("Appendix: full source hashes and citation key", styles["SectionCustom"]))
+    appendix = [Paragraph("Appendix: full source hashes and citation key", styles["SectionCustom"]),
+                Paragraph("A = verified artifact; E = observed event; D = model detection; T = rule-based ATT&amp;CK mapping; S = SHAP explanation; M = missing-evidence recommendation. Citation codes point to registered findings and verified source files.", styles["BodyCustom"])]
     for claim in report["inventory"]:
         for ref in claim["citations"]:
-            flow.append(Paragraph(escape(f"[{claim['id']}] {ref['sourceFile']} | {ref['artifactId']} | SHA-256 {ref['sha256']}"), styles["SmallCustom"]))
+            appendix.append(Paragraph(escape(f"[{claim['id']}] {ref['sourceFile']} | {ref['artifactId']} | SHA-256 {ref['sha256']}"), styles["SmallCustom"]))
+    flow.append(KeepTogether(appendix[:3]))
+    flow.extend(appendix[3:])
     def footer(canvas, document):
         canvas.setStrokeColor(colors.HexColor("#d7e3e7")); canvas.line(43, 39, A4[0]-43, 39)
         canvas.setFont("Helvetica", 7); canvas.setFillColor(navy)
