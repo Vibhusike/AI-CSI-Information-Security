@@ -1,0 +1,61 @@
+text,event_type,source_type,status,label
+Routine employee login completed from known campus workstation,successful_login,endpoint_auth,success,NORMAL
+Scheduled identity service health check passed,service_health,endpoint_auth,success,NORMAL
+User opened the shared employee handbook,file_access,endpoint_auth,success,NORMAL
+Nightly backup completed successfully,backup_completed,endpoint_auth,success,NORMAL
+Approved deployment completed in staging,deployment_completed,endpoint_auth,success,NORMAL
+Normal DNS query resolved the internal mail server,dns_query,dns,success,NORMAL
+Firewall allowed routine HTTPS traffic to approved update service,network_connection,firewall,allowed,NORMAL
+User logged out from VPN at end of day,successful_logout,endpoint_auth,success,NORMAL
+Scheduled vulnerability scan from approved scanner,recon_scan,ids,approved,NORMAL
+Developer pulled source code from internal repository,git_pull,endpoint_auth,success,NORMAL
+Proxy served approved documentation website,web_request,proxy,allowed,NORMAL
+EDR reported normal signed browser process start,process_creation,edr,success,NORMAL
+Sysmon recorded signed office process creation,process_creation,sysmon,success,NORMAL
+Routine authentication token refresh succeeded,token_refresh,endpoint_auth,success,NORMAL
+Internal DNS service health request completed,dns_query,dns,success,NORMAL
+User printed a public policy document,file_access,endpoint_auth,success,NORMAL
+Backup service connected to approved archive host,network_connection,firewall,allowed,NORMAL
+Endpoint antivirus signature update completed,security_update,edr,success,NORMAL
+Approved administrator changed a service configuration,configuration_change,sysmon,success,NORMAL
+System account rotated an application secret,credential_rotation,endpoint_auth,success,NORMAL
+Multiple failed logins observed for one account,failed_login,endpoint_auth,failure,SUSPICIOUS
+MFA prompts repeated seven times within ninety seconds,mfa_fatigue,endpoint_auth,blocked,SUSPICIOUS
+Successful login originated from impossible geographic travel,impossible_travel_login,endpoint_auth,success,SUSPICIOUS
+Firewall allowed connection to a newly observed external host,suspicious_outbound_connection,firewall,allowed,SUSPICIOUS
+IDS flagged a redirect to a credential harvesting domain,credential_phishing_redirect,ids,alerted,SUSPICIOUS
+Unsigned PowerShell process launched an encoded command,powershell_command,sysmon,success,SUSPICIOUS
+User created an unusual mailbox forwarding rule,mailbox_rule_created,endpoint_auth,success,SUSPICIOUS
+Large upload sent to an unsanctioned cloud domain,large_upload,proxy,allowed,SUSPICIOUS
+Temporary administrator role granted outside change window,admin_grant,endpoint_auth,success,SUSPICIOUS
+Sensitive payroll file opened shortly after privilege change,sensitive_file_access,endpoint_auth,success,SUSPICIOUS
+DNS query contacted a newly registered callback domain,dns_query,dns,success,SUSPICIOUS
+Browser opened an external link with failed SPF context,malicious_link_clicked,browser_history,opened,SUSPICIOUS
+OAuth token used from an unfamiliar client address,oauth_token_use,endpoint_auth,success,SUSPICIOUS
+Registry run key created by an untrusted process,registry_run_key_created,registry,success,SUSPICIOUS
+Process contacted a rare internet address immediately after execution,process_network_connection,sysmon,allowed,SUSPICIOUS
+Email header failed SPF and DKIM authentication,email_header_anomaly,email_headers,delivered,SUSPICIOUS
+Archive containing confidential files created outside work hours,data_staging,edr,success,SUSPICIOUS
+IDS detected repeated beacon timing to external infrastructure,command_control_beacon,ids,alerted,SUSPICIOUS
+Memory scan recovered suspicious injected process strings,memory_indicator,memory,recovered,SUSPICIOUS
+Firewall recorded an unusually long encrypted outbound session,suspicious_outbound_connection,firewall,allowed,SUSPICIOUS
+Known malware signature detected in invoice executable,malware_detection,edr,detected,MALICIOUS
+Rapid file encryption changed hundreds of document extensions,ransomware_activity,edr,detected,MALICIOUS
+Database dump created then transferred to external command server,data_exfiltration,pcap,observed,MALICIOUS
+DNS tunnelling encoded data in repeated TXT queries,dns_tunnel,dns,alerted,MALICIOUS
+PowerShell downloaded and executed a known malicious payload,powershell_command,sysmon,detected,MALICIOUS
+Credential phishing page captured a user password,credential_phishing_redirect,ids,confirmed,MALICIOUS
+Malicious attachment launched an unsigned executable,email_attachment_opened,email_headers,detected,MALICIOUS
+Process injected code into the authentication service,process_injection,edr,detected,MALICIOUS
+Registry startup key persisted a known malicious executable,registry_run_key_created,registry,confirmed,MALICIOUS
+Account added attacker-controlled external forwarding rule,email_forwarding_rule,endpoint_auth,confirmed,MALICIOUS
+Confidential archive uploaded to known exfiltration host,cloud_upload,proxy,confirmed,MALICIOUS
+Repeated brute force attempts followed by privileged login,brute_force,endpoint_auth,confirmed,MALICIOUS
+Endpoint contacted known command and control infrastructure,command_control_beacon,edr,confirmed,MALICIOUS
+Malware process disabled endpoint protection controls,defense_impairment,edr,confirmed,MALICIOUS
+Memory capture contained decrypted ransomware configuration,malware_memory_indicator,memory,recovered,MALICIOUS
+Packet flow confirmed large encrypted transfer to attacker host,data_exfiltration,pcap,confirmed,MALICIOUS
+Web shell executed system commands on the server,command_execution,sysmon,confirmed,MALICIOUS
+Malicious process harvested browser session tokens,credential_access,edr,confirmed,MALICIOUS
+Sensitive database records were staged and compressed,data_staging,edr,confirmed,MALICIOUS
+Known attacker IP performed lateral movement to file server,lateral_movement,firewall,confirmed,MALICIOUS

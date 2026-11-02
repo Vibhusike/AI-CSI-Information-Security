@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 import numpy as np
@@ -103,6 +104,7 @@ class ModelBundle:
         self.model.load_model(model_path)
         self.explainer = shap.TreeExplainer(self.model)
         self._ner: Any | None = None
+        self._ner_lock = Lock()
 
     def feature_matrix(self, events: list[dict[str, Any]]) -> np.ndarray:
         texts = [event["normalized_text"] for event in events]
@@ -137,12 +139,13 @@ class ModelBundle:
         return explanations
 
     def semantic_entities(self, texts: list[str]) -> list[list[dict[str, str | float]]]:
-        if self._ner is None:
-            tokenizer = AutoTokenizer.from_pretrained(NER_MODEL)
-            model = AutoModelForTokenClassification.from_pretrained(NER_MODEL)
-            self._ner = pipeline("token-classification", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+        with self._ner_lock:
+            if self._ner is None:
+                tokenizer = AutoTokenizer.from_pretrained(NER_MODEL)
+                model = AutoModelForTokenClassification.from_pretrained(NER_MODEL)
+                self._ner = pipeline("token-classification", model=model, tokenizer=tokenizer, aggregation_strategy="simple")
+            batches = self._ner([text[:512] for text in texts], batch_size=min(32, max(1, len(texts)))) if texts else []
         results: list[list[dict[str, str | float]]] = []
-        batches = self._ner([text[:512] for text in texts], batch_size=min(32, max(1, len(texts)))) if texts else []
         for raw_entities in batches:
             entities: list[dict[str, str | float]] = []
             for item in raw_entities:

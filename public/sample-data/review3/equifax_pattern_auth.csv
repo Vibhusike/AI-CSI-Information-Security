@@ -1,0 +1,2 @@
+timestamp,event_type,status,host,user,src_ip,dst_ip,resource,message
+2026-01-12T10:07:00Z,successful_login,success,lab-db-01,svc_dispute,10.0.4.12,10.0.8.20,lab_database,Synthetic service account login from the web application host to a database

@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2026-01-12T10:15:02Z",
+    "event_type": "suspicious_outbound_connection",
+    "status": "observed",
+    "host": "lab-web-01",
+    "user": "svc_dispute",
+    "src_ip": "10.0.4.12",
+    "dst_ip": "198.51.100.88",
+    "resource": "TLS_443_flow_metadata_only",
+    "message": "Synthetic flow metadata corroborating the test upload; no packet payload is present"
+  }
+]

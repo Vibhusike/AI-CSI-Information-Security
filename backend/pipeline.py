@@ -499,6 +499,6 @@ def analyse(case_id: str, raw_artifacts: list[dict[str, Any]], models: ModelBund
             "missingEvidenceEngine": {"status": "CUSTOM AI-CSI LOGIC"},
             "confidenceEngine": {"status": "CUSTOM AI-CSI LOGIC"},
             "forensicReport": {"status": "DETERMINISTIC EVIDENCE-GROUNDED"},
-            "llmRag": {"status": "NOT IMPLEMENTED FOR REVIEW 2"},
+            "llmRag": {"status": "REVIEW 3 REPORT AND Q&A AVAILABLE", "purpose": "Server-side LLM claim selection with cited deterministic rendering"},
         },
     }
